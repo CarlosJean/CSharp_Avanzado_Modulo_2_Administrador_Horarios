@@ -42,3 +42,31 @@ Bash
 ```bash
 dotnet ef database update -p ScheduleManager
 ```
+
+## Imágenes
+### Materias
+<img width="1920" height="1032" alt="65" src="https://github.com/user-attachments/assets/7059b3b8-cb03-45b7-81e2-1b96d7eb94a2" />
+
+### Maestros
+<img width="1920" height="1032" alt="7" src="https://github.com/user-attachments/assets/f6684ede-f29e-45be-98a3-8cb41a80b09c" />
+
+### Grados
+<img width="1920" height="1032" alt="5" src="https://github.com/user-attachments/assets/fb5c485a-4fcb-47ab-81fb-bf64bceb7707" />
+
+---
+### Horarios
+<img width="1920" height="1032" alt="1" src="https://github.com/user-attachments/assets/bda71889-0ced-499f-94f2-4c7fe85cb9cf" />
+<img width="1920" height="1032" alt="3" src="https://github.com/user-attachments/assets/4c852389-8c94-4339-a462-13c1e4cc027e" />
+
+#### Validación de choque de horarios
+
+Un mismo profesor no puede estar en dos lugares al mismo tiempo.
+<img width="1920" height="1032" alt="4" src="https://github.com/user-attachments/assets/9692e998-5d1f-4623-90ff-a4bca84f04fc" />
+
+#### Creación de horarios
+<img width="1920" height="1032" alt="2" src="https://github.com/user-attachments/assets/dfb2bca3-c82f-4056-8743-4f653eb4cc3c" />
+
+
+
+
+
