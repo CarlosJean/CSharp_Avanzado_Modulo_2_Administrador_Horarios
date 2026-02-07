@@ -44,6 +44,11 @@ dotnet ef database update -p ScheduleManager
 ```
 
 ## Imágenes
+
+### Diagrama de base de datos
+<img width="834" height="672" alt="imagen" src="https://github.com/user-attachments/assets/90e4e40c-bcbd-4185-84c6-6ad725c839ae" />
+
+
 ### Materias
 <img width="1920" height="1032" alt="65" src="https://github.com/user-attachments/assets/7059b3b8-cb03-45b7-81e2-1b96d7eb94a2" />
 
