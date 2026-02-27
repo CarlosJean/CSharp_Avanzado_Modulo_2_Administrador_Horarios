@@ -6,6 +6,7 @@ namespace ScheduleManager.Models {
 
 		[Display(Name = "Descripción")]
 		public string Description { get; set; }
+		public string EducationalLevel { get; set; }
 		public ICollection<Schedule> Schedules { get; set; }
 	}
 }

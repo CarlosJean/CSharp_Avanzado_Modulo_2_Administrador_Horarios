@@ -6,6 +6,10 @@ namespace ScheduleManager.Models {
 
 		[Display(Name = "Nombre completo")]
 		public string Fullname { get; set; }
-		public ICollection<Schedule> Schedules { get; set; }
+		[Display(Name = "Especialidad")]
+		public string Speciality { get; set; }
+		[Display(Name = "Cantidad de horas máximas")]
+		public int MaxHours { get; set; }
+		public ICollection<Schedule>? Schedules { get; set; }
 	}
 }
