@@ -18,7 +18,7 @@ namespace ScheduleManager.Controllers {
 
 		// GET: Schedules
 		public async Task<IActionResult> Index() {
-			var scheduleManagerContext = _context.Schedule.Include(s => s.Grade).Include(s => s.Room).Include(s => s.Subject).Include(s => s.Teacher);		
+			var scheduleManagerContext = _context.Schedule.Include(s => s.Grade).Include(s => s.Room).Include(s => s.Subject).Include(s => s.Teacher);
 
 
 			return View(await scheduleManagerContext.ToListAsync());
@@ -72,14 +72,24 @@ namespace ScheduleManager.Controllers {
 		public async Task<IActionResult> Create([Bind("Id,SubjectId,DayOfWeek,StartTime,EndTime,RoomId,GradeId,TeacherId")] Schedule schedule) {
 
 			bool isThereCoincidence = _context.Schedule.Any(s =>
-				s.TeacherId == schedule.TeacherId &&
 				s.DayOfWeek == schedule.DayOfWeek &&
 				s.StartTime < schedule.EndTime &&
 				s.EndTime > schedule.StartTime);
 
 			if (isThereCoincidence) {
 				// Agregamos el mensaje en español al ModelState
-				ModelState.AddModelError(string.Empty, "El horario seleccionado coincide con otra clase ya programada para este profesor.");
+				ModelState.AddModelError(string.Empty, "El horario seleccionado coincide con otra clase ya programada en el aula seleccionada.");
+			}
+
+			var teachersWeeklyHours = _context
+				.Schedule
+				.Where(s => s.TeacherId == schedule.TeacherId).ToList()
+				.Sum(s => (s.EndTime - s.StartTime).TotalHours) + schedule.EndTime.Subtract(schedule.StartTime).TotalHours;
+
+			var teacher = await _context.Teacher.FirstAsync(t => t.Id == schedule.TeacherId);
+
+			if (teachersWeeklyHours > teacher.MaxHours) {
+				ModelState.AddModelError(string.Empty, "Este horario hace que se exceda la cantidad de horas máximas del maestro seleccionado.");
 			}
 
 			if (ModelState.IsValid) {
@@ -91,6 +101,16 @@ namespace ScheduleManager.Controllers {
 			ViewData["RoomId"] = new SelectList(_context.Set<Room>(), "Id", "Description");
 			ViewData["SubjectId"] = new SelectList(_context.Set<Subject>(), "Id", "Description");
 			ViewData["TeacherId"] = new SelectList(_context.Set<Teacher>(), "Id", "Fullname");
+
+			var daysOfWeeks = new[] {
+				new { Id = Convert.ToInt32(DayOfWeek.Monday),  DayOfWeek = "Lunes"},
+				new { Id = Convert.ToInt32(DayOfWeek.Tuesday),  DayOfWeek = "Martes"},
+				new { Id = Convert.ToInt32(DayOfWeek.Wednesday),  DayOfWeek = "Miércoles"},
+				new { Id = Convert.ToInt32(DayOfWeek.Thursday),  DayOfWeek = "Jueves"},
+				new { Id = Convert.ToInt32(DayOfWeek.Friday),  DayOfWeek = "Viernes"}
+			};
+
+			ViewData["DaysOfWeek"] = new SelectList(daysOfWeeks.ToList(), "Id", "DayOfWeek", schedule.DayOfWeek);
 			return View(schedule);
 		}
 
@@ -139,7 +159,7 @@ namespace ScheduleManager.Controllers {
 			}
 
 			bool isThereCoincidence = _context.Schedule.Any(s =>
-				s.TeacherId == schedule.TeacherId &&
+				s.TeacherId != schedule.TeacherId &&
 				s.DayOfWeek == schedule.DayOfWeek &&
 				s.StartTime < schedule.EndTime &&
 				s.EndTime > schedule.StartTime);
@@ -147,6 +167,17 @@ namespace ScheduleManager.Controllers {
 			if (isThereCoincidence) {
 				// Agregamos el mensaje en español al ModelState
 				ModelState.AddModelError(string.Empty, "El horario seleccionado coincide con otra clase ya programada para este profesor.");
+			}
+
+			var teachersWeeklyHours = _context
+				.Schedule
+				.Where(s => s.TeacherId == schedule.TeacherId).ToList()
+				.Sum(s => (s.EndTime - s.StartTime).TotalHours) + schedule.EndTime.Subtract(schedule.StartTime).TotalHours;
+
+			var teacher = await _context.Teacher.FirstAsync(t => t.Id == schedule.TeacherId);
+
+			if (teachersWeeklyHours > teacher.MaxHours) {
+				ModelState.AddModelError(string.Empty, "Este horario hace que se exceda la cantidad de horas máximas del maestro seleccionado.");
 			}
 
 			if (ModelState.IsValid) {
@@ -162,10 +193,31 @@ namespace ScheduleManager.Controllers {
 				}
 				return RedirectToAction(nameof(Index));
 			}
-			ViewData["GradeId"] = new SelectList(_context.Set<Grade>(), "Id", "Id", schedule.GradeId);
-			ViewData["RoomId"] = new SelectList(_context.Set<Room>(), "Id", "Id", schedule.RoomId);
-			ViewData["SubjectId"] = new SelectList(_context.Set<Subject>(), "Id", "Id", schedule.SubjectId);
-			ViewData["TeacherId"] = new SelectList(_context.Set<Teacher>(), "Id", "Id", schedule.TeacherId);
+
+			schedule = await _context.Schedule
+				.Include(s => s.Grade)
+				.Include(s => s.Room)
+				.Include(s => s.Subject)
+				.Include(s => s.Teacher)
+				.FirstOrDefaultAsync(s => s.Id == id);
+
+
+			ViewData["GradeId"] = new SelectList(_context.Set<Grade>(), "Id", "Description", schedule.Grade.Description);
+			ViewData["RoomId"] = new SelectList(_context.Set<Room>(), "Id", "Description", schedule.Room.Description);
+			ViewData["SubjectId"] = new SelectList(_context.Set<Subject>(), "Id", "Description", schedule.Subject.Description);
+			ViewData["TeacherId"] = new SelectList(_context.Set<Teacher>(), "Id", "Fullname", schedule.Teacher.Fullname);
+
+			var daysOfWeeks = new[] {
+				new { Id = Convert.ToInt32(DayOfWeek.Monday),  DayOfWeek = "Lunes"},
+				new { Id = Convert.ToInt32(DayOfWeek.Tuesday),  DayOfWeek = "Martes"},
+				new { Id = Convert.ToInt32(DayOfWeek.Wednesday),  DayOfWeek = "Miércoles"},
+				new { Id = Convert.ToInt32(DayOfWeek.Thursday),  DayOfWeek = "Jueves"},
+				new { Id = Convert.ToInt32(DayOfWeek.Friday),  DayOfWeek = "Viernes"}
+			};
+
+			ViewData["DaysOfWeek"] = new SelectList(daysOfWeeks.ToList(), "Id", "DayOfWeek", schedule.DayOfWeek);
+
+			ViewData["DayOfWeek"] = new SelectList(_context.Set<Subject>(), "Id", "DayOfWeek", schedule.DayOfWeek);
 			return View(schedule);
 		}
 
@@ -181,6 +233,7 @@ namespace ScheduleManager.Controllers {
 				.Include(s => s.Subject)
 				.Include(s => s.Teacher)
 				.FirstOrDefaultAsync(m => m.Id == id);
+
 			if (schedule == null) {
 				return NotFound();
 			}
