@@ -233,6 +233,7 @@ namespace ScheduleManager.Controllers {
 				.Include(s => s.Subject)
 				.Include(s => s.Teacher)
 				.FirstOrDefaultAsync(m => m.Id == id);
+
 			if (schedule == null) {
 				return NotFound();
 			}
